@@ -1,16 +1,20 @@
 package api
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
+	user "github.com/LuisKpBeta/api-transfer/internal/domain"
 	"github.com/LuisKpBeta/api-transfer/internal/usecase"
 	"github.com/google/uuid"
 	"github.com/valyala/fasthttp"
 )
 
 type ApiRouter struct {
-	GetUserBalance usecase.GetUserBalance
+	GetUserBalance     usecase.GetUserBalance
+	CreateUserTransfer usecase.CreateUserTransfer
 }
 
 func (a *ApiRouter) GetUserBalanceById(ctx *fasthttp.RequestCtx) {
@@ -39,4 +43,28 @@ func (a *ApiRouter) GetUserBalanceById(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	MakeJsonResponse(ctx, user, http.StatusOK)
+}
+
+func (a *ApiRouter) CreateTransfer(ctx *fasthttp.RequestCtx) {
+	ctxBody := ctx.Request.Body()
+	var bodyRequest CreateTransferDto
+	err := json.Unmarshal(ctxBody, &bodyRequest)
+	if err != nil {
+		response := ErrorMessage{Message: err.Error()}
+		MakeJsonResponse(ctx, response, http.StatusBadRequest)
+		return
+	}
+	err = a.CreateUserTransfer.CreateUserTransfer(bodyRequest.Sender, bodyRequest.Receiver, bodyRequest.Total)
+	if err != nil {
+		if errors.Is(err, user.ErrSenderBalanceInvalid) {
+			response := ErrorMessage{Message: err.Error()}
+			MakeJsonResponse(ctx, response, http.StatusBadRequest)
+			return
+		}
+		response := ErrorMessage{Message: err.Error()}
+		MakeJsonResponse(ctx, response, http.StatusInternalServerError)
+		return
+	}
+	ctx.Response.SetStatusCode(http.StatusOK)
+	return
 }
