@@ -1,0 +1,26 @@
+version: "3.5"
+services:
+  db:
+    image: postgres
+    hostname: db
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: transfer
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "0.5GB"
+    volumes:
+      - transfer-api-db:/var/lib/postgresql/data
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  transfer-api-db:
+
+networks:
+  default:
+    driver: bridge
