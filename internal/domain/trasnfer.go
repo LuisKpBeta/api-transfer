@@ -8,6 +8,7 @@ import (
 )
 
 type Transfer struct {
+	Id            string
 	SenderId      string
 	ReceiverId    string
 	Total         int

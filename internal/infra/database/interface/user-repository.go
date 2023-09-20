@@ -4,5 +4,6 @@ import user "github.com/LuisKpBeta/api-transfer/internal/domain"
 
 type UserRepostory interface {
 	LoadUserById(id string) (*user.User, error)
-	LoadUserBalanceById(id string) (int, error)
+	UpdateUserBalanceById(user *user.User) error
+	CreateUserTransfer(transfer user.Transfer) error
 }
