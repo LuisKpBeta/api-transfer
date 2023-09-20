@@ -66,5 +66,4 @@ func (a *ApiRouter) CreateTransfer(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	ctx.Response.SetStatusCode(http.StatusOK)
-	return
 }
