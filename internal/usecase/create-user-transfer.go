@@ -23,31 +23,35 @@ func (c *CreateUserTransfer) CreateUserTransfer(senderId, receiverId string, tot
 		Total:         value,
 		OperationDate: time.Now(),
 	}
-	sender, err := c.UserRepository.LoadUserById(newTransfer.SenderId)
+	trx := c.UserRepository.StartTransaction()
+	defer c.UserRepository.AbortTransaction(trx)
+	sender, err := c.UserRepository.TrxLoadUserById(trx, newTransfer.SenderId)
 	if err != nil {
 		return err
+	}
+	if sender == nil {
+		return user.ErrSenderNotFound
 	}
 	if sender.Balance < value {
 		return user.ErrSenderBalanceInvalid
 	}
-	receiver, err := c.UserRepository.LoadUserById(receiverId)
+	receiver, err := c.UserRepository.TrxLoadUserById(trx, receiverId)
 	if err != nil {
 		return err
 	}
-	receiver.Balance += newTransfer.Total
-	sender.Balance -= newTransfer.Total
+	if receiver == nil {
+		return user.ErrReceiverNotFound
+	}
 
-	err = c.UserRepository.UpdateUserBalanceById(receiver)
-	if err != nil {
+	if err = c.UserRepository.UpdateUserBalanceById(trx, newTransfer.ReceiverId, newTransfer.Total); err != nil {
 		return err
 	}
-	err = c.UserRepository.UpdateUserBalanceById(sender)
-	if err != nil {
+	if err = c.UserRepository.UpdateUserBalanceById(trx, newTransfer.SenderId, -newTransfer.Total); err != nil {
 		return err
 	}
-	err = c.UserRepository.CreateUserTransfer(newTransfer)
-	if err != nil {
+	if err = c.UserRepository.CreateUserTransfer(trx, newTransfer); err != nil {
 		return err
 	}
+	c.UserRepository.EndTransaction(trx)
 	return nil
 }
