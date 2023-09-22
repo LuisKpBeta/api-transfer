@@ -56,7 +56,7 @@ func (a *ApiRouter) CreateTransfer(ctx *fasthttp.RequestCtx) {
 	}
 	err = a.CreateUserTransfer.CreateUserTransfer(bodyRequest.Sender, bodyRequest.Receiver, bodyRequest.Total)
 	if err != nil {
-		if errors.Is(err, user.ErrSenderBalanceInvalid) {
+		if errors.Is(err, user.ErrSenderBalanceInvalid) || errors.Is(err, user.ErrReceiverNotFound) || errors.Is(err, user.ErrSenderNotFound) {
 			response := ErrorMessage{Message: err.Error()}
 			MakeJsonResponse(ctx, response, http.StatusBadRequest)
 			return

@@ -17,6 +17,8 @@ type Transfer struct {
 
 var (
 	ErrSenderBalanceInvalid = errors.New("sender don't have enought balance")
+	ErrReceiverNotFound     = errors.New("receiver not found for informed id")
+	ErrSenderNotFound       = errors.New("receiver not found for informed id")
 )
 
 func GetBalanceValueFromString(value string) (int, error) {
