@@ -12,3 +12,7 @@ This API was created based on the [DevGym challenge](https://app.devgym.com.br/c
 
 Note: There is no need to create endpoints for creating users; populate the database in a way that both users exist, and transfers can be made between them.
 
+## Main Challenges
+
+- Ensure that two transfers executed at the same time will be processed correctly.
+- Forcing a failure operation in PostgreSQL to simulate a failed operation, ensuring that if failures occur during the transaction, the entire operation will be rolled back.
